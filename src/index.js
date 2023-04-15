@@ -1,7 +1,7 @@
 // import './css/styles.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import debounce from 'lodash.debounce';
-import SimpleLightbox from "simplelightbox";
+// import SimpleLightbox from "simplelightbox";
 // import "simplelightbox/dist/simple-lightbox.min.css;
 import FotoService from './js/fetchFoto';
 // import { murkupGallery } from './js/markupGallery';
