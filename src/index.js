@@ -1,185 +1,69 @@
+// import './css/styles.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
+import debounce from 'lodash.debounce';
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
+import FotoService from './js/fetchFoto';
+// import { murkupGallery } from './js/markupGallery';
 
-import { createMarkup } from './js/markupGallery';
-import { PixabayAPI } from './js/fetchFoto';
-import { refs } from './js/refs';
-import { notifyInit } from './js/notifyInit';
-import { spinnerPlay, spinnerStop } from './js/spinner';
-
-const modalLightboxGallery = new SimpleLightbox('.gallery a', {
-  captionDelay: 250,
-});
-
-spinnerPlay();
-
-window.addEventListener('load', () => {
-  console.log('All resources finished loading!');
-
-  spinnerStop();
-});
-
-refs.btnLoadMore.classList.add('is-hidden');
-
-const pixaby = new PixabayAPI();
-
-const options = {
-  root: null,
-  rootMargin: '100px',
-  threshold: 1.0,
-};
-
-const loadMorePhotos = async function (entries, observer) {
-  entries.forEach(async entry => {
-    if (entry.isIntersecting) {
-      observer.unobserve(entry.target);
-      pixaby.incrementPage();
-
-      spinnerPlay();
-
-      try {
-        spinnerPlay();
-
-        const { hits } = await pixaby.getPhotos();
-        const markup = createMarkup(hits);
-        refs.gallery.insertAdjacentHTML('beforeend', markup);
-
-        // const showMore = pixaby.hasMorePhotos();
-        if (pixaby.hasMorePhotos) {
-          const lastItem = document.querySelector('.gallery a:last-child');
-          observer.observe(lastItem);
-        } else
-          Notify.info(
-            "We're sorry, but you've reached the end of search results.",
-            notifyInit
-          );
-
-        modalLightboxGallery.refresh();
-        scrollPage();
-      } catch (error) {
-        Notify.failure(error.message, 'Something went wrong!', notifyInit);
-        clearPage();
-      } finally {
-        spinnerStop();
-      }
-    }
-  });
-};
-
-const observer = new IntersectionObserver(loadMorePhotos, options);
-
-const onSubmitClick = async event => {
-  event.preventDefault();
-
-  const {
-    elements: { searchQuery },
-  } = event.target;
-
-  const search_query = searchQuery.value.trim().toLowerCase();
-
-  if (!search_query) {
-    clearPage();
-    Notify.info('Enter data to search!', notifyInit);
-
-    refs.searchInput.placeholder = 'What`re we looking for?';
-    return;
-  }
-
-  pixaby.query = search_query;
-
-  clearPage();
-
-  try {
-    spinnerPlay();
-    const { hits, total } = await pixaby.getPhotos();
-
-    if (hits.length === 0) {
-      Notify.failure(
-        `Sorry, there are no images matching your ${search_query}. Please try again.`,
-        notifyInit
-      );
-
-      return;
-    }
-
-    const markup = createMarkup(hits);
-    refs.gallery.insertAdjacentHTML('beforeend', markup);
-
-    pixaby.setTotal(total);
-    Notify.success(`Hooray! We found ${total} images.`, notifyInit);
-
-    if (pixaby.hasMorePhotos) {
-      //refs.btnLoadMore.classList.remove('is-hidden');
-
-      const lastItem = document.querySelector('.gallery a:last-child');
-      observer.observe(lastItem);
-    }
-
-    modalLightboxGallery.refresh();
-    // scrollPage();
-  } catch (error) {
-    Notify.failure(error.message, 'Something went wrong!', notifyInit);
-
-    clearPage();
-  } finally {
-    spinnerStop();
-  }
-};
-
-const onLoadMore = async () => {
-  pixaby.incrementPage();
-
-  if (!pixaby.hasMorePhotos) {
-    refs.btnLoadMore.classList.add('is-hidden');
-    Notify.info("We're sorry, but you've reached the end of search results.");
-    notifyInit;
-  }
-  try {
-    const { hits } = await pixaby.getPhotos();
-    const markup = createMarkup(hits);
-    refs.gallery.insertAdjacentHTML('beforeend', markup);
-
-    modalLightboxGallery.refresh();
-  } catch (error) {
-    Notify.failure(error.message, 'Something went wrong!', notifyInit);
-
-    clearPage();
-  }
-};
-
-function clearPage() {
-  pixaby.resetPage();
-  refs.gallery.innerHTML = '';
-  refs.btnLoadMore.classList.add('is-hidden');
+const refs = {
+  searchForm: document.querySelector('.search-form'),
+  gallery: document.querySelector('.gallery')
 }
 
-refs.form.addEventListener('submit', onSubmitClick);
-refs.btnLoadMore.addEventListener('click', onLoadMore);
+var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
 
-//  smooth scrolling
-function scrollPage() {
-  const { height: cardHeight } = document
-    .querySelector('.photo-gallery')
-    .firstElementChild.getBoundingClientRect();
+const fotoService = new FotoService();
 
-  window.scrollBy({
-    top: cardHeight * 2,
-    behavior: 'smooth',
-  });
+refs.searchForm.addEventListener('submit', onSearch);
+
+function onSearch(e) {
+  e.preventDefault();
+  clearGallery();
+  fotoService.query = e.currentTarget.elements.searchQuery.value;
+  fotoService.resetPage();
+  fotoService.fetchFoto().then(hits => murkupGallery(hits));
 }
 
-//Button smooth scroll up
 
-window.addEventListener('scroll', scrollFunction);
+const murkupGallery = (hits) => {
+  const imagesMarkup = hits.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) =>
+    `<div class="photo-card">
+   <a href="${largeImageURL}" target="_blank" class="gallery-item">
+  <img src="${webformatURL}" alt="${tags}" loading="lazy" />
+</a>
+  <div class="info">
+    <p class="info-item">
+      <b>Likes ${likes} </b>
+    </p>
+    <p class="info-item">
+      <b>Views ${views} </b>
+    </p>
+    <p class="info-item">
+      <b>Comments ${comments}</b>
+    </p>
+    <p class="info-item">
+      <b>Downloads ${downloads}</b>
+    </p>
+  </div>
+</div>`
+  ).join('');
+  refs.gallery.insertAdjacentHTML('beforeend', imagesMarkup);
+  lightbox.refresh()
+}
 
-function scrollFunction() {
-  if (document.body.scrollTop > 30 || document.documentElement.scrollTop > 30) {
-    refs.btnUpWrapper.style.display = 'flex';
-  } else {
-    refs.btnUpWrapper.style.display = 'none';
+
+function clearGallery() {
+  refs.gallery.innerHTML = "";
+}
+
+
+window.addEventListener('scroll', debounce(() => {
+  const documentRect = document.documentElement.getBoundingClientRect()
+  console.log(documentRect.bottom, documentRect.height)
+  const mid = document.documentElement.clientHeight
+  console.log(mid)
+  if (documentRect.bottom < mid + 500) {
+  fotoService.fetchFoto().then(hits => murkupGallery(hits));
   }
-}
-refs.btnUp.addEventListener('click', () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+}, 200))
