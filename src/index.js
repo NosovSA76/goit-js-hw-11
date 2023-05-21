@@ -1,15 +1,18 @@
-// import './css/styles.css';
+export { refs }
+
+//import './css/styles.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import debounce from 'lodash.debounce';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import FotoService from './js/fetchFoto';
-// import { murkupGallery } from './js/markupGallery';
+// import  murkupGallery from './js/markupGallery';
 
 const refs = {
   searchForm: document.querySelector('.search-form'),
   gallery: document.querySelector('.gallery')
 }
+var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250, showCounter: false });
 
 const fotoService = new FotoService();
 
@@ -49,7 +52,6 @@ const murkupGallery = (hits) => {
   ).join('');
 
   refs.gallery.insertAdjacentHTML('beforeend', imagesMarkup);
-  var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250, showCounter: false });
   lightbox.refresh()
 }
 

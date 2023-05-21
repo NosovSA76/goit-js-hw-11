@@ -1,7 +1,7 @@
+import  refs  from '../index';
 
-const murkupGallery = (hits) => {
-  console.log(refs)
-  const imagesMarkup = hits.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) =>
+export function murkupGallery(hits) {
+return hits.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) =>
     `<div class="photo-card">
   <img src="${webformatURL}" alt="${tags}" loading="lazy" />
   <div class="info">
@@ -20,4 +20,8 @@ const murkupGallery = (hits) => {
   </div>
 </div>`
   ).join('');
+
+  refs.gallery.insertAdjacentHTML('beforeend', imagesMarkup);
+  var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250, showCounter: false });
+  lightbox.refresh()
 }
