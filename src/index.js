@@ -12,6 +12,7 @@ import { murkupGallery } from './js/markupGallery';
 
 
 var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
+
 const fotoService = new FotoService();
 
 
@@ -22,6 +23,7 @@ async function onSearch(e) {
   clearGallery();
   fotoService.query = e.currentTarget.elements.searchQuery.value.trim().toLowerCase();
   fotoService.resetPage();
+
 
   try {
     const { hits, total } = await fotoService.fetchFoto();
@@ -38,7 +40,8 @@ async function onSearch(e) {
   } catch (error) {
     Notify.failure('Something went wrong!');
   }
-}
+
+
 
 function clearGallery() {
   refs.gallery.innerHTML = "";

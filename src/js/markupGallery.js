@@ -1,5 +1,7 @@
+
 import { refs } from './refs.js'
 export function murkupGallery(photos) {
+
   return photos
     .map(
       ({
@@ -11,6 +13,7 @@ export function murkupGallery(photos) {
         comments,
         downloads,
       }) => {
+
         return /*html*/ `<div class="photo-card">
    <a href="${largeImageURL}" target="_blank" class="gallery-item">
   <img src="${webformatURL}" alt="${tags}" loading="lazy" />
