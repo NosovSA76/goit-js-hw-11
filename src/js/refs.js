@@ -1,5 +1,5 @@
 export const refs = {
-  form: document.querySelector('.search-form'),
+  searchForm: document.querySelector('.search-form'),
   gallery: document.querySelector('.gallery'),
   btnLoadMore: document.querySelector('.load-more'),
   backdrop: document.querySelector('.backdrop'),
