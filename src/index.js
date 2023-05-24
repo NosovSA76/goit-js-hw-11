@@ -30,7 +30,7 @@ async function onSearch(e) {
     const murkup = murkupGallery(hits);
     refs.gallery.insertAdjacentHTML('beforeend', murkup);
     lightbox.refresh();
-    if(total > 0){
+    if (total > 0) {
       Notify.success(`Hooray! We found ${total} images. But we can show only 520`);
     }
     else {
@@ -40,7 +40,7 @@ async function onSearch(e) {
   } catch (error) {
     Notify.failure('Something went wrong!');
   }
-
+}
 
 
 function clearGallery() {
