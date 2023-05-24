@@ -6,6 +6,7 @@ import debounce from 'lodash.debounce';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import FotoService from './js/fetchFoto';
+<<<<<<< Updated upstream
 // import  murkupGallery from './js/markupGallery';
 
 const refs = {
@@ -17,17 +18,43 @@ var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDe
 const fotoService = new FotoService();
 
 console.log(fotoService);
+=======
+import { refs } from './js/refs.js'
+import { murkupGallery } from './js/markupGallery';
+// import { addMoreFoto } from './js/addMoreFoto';
+
+
+var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
+const fotoService = new FotoService();
+
+>>>>>>> Stashed changes
 
 refs.searchForm.addEventListener('submit', onSearch);
 
-function onSearch(e) {
+async function onSearch(e) {
   e.preventDefault();
   clearGallery();
-  fotoService.query = e.currentTarget.elements.searchQuery.value;
+  fotoService.query = e.currentTarget.elements.searchQuery.value.trim().toLowerCase();
   fotoService.resetPage();
-  fotoService.fetchFoto().then(hits => murkupGallery(hits));
+
+  try {
+    const { hits, total } = await fotoService.fetchFoto();
+    const murkup = murkupGallery(hits);
+    refs.gallery.insertAdjacentHTML('beforeend', murkup);
+    lightbox.refresh();
+    if(total > 0){
+      Notify.success(`Hooray! We found ${total} images. But we can show only 520`);
+    }
+    else {
+      Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+
+    }
+  } catch (error) {
+    Notify.failure('Something went wrong!');
+  }
 }
 
+<<<<<<< Updated upstream
 const murkupGallery = (hits) => {
   const imagesMarkup = hits.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) =>
     `<div class="photo-card">
@@ -55,16 +82,37 @@ const murkupGallery = (hits) => {
   lightbox.refresh()
 }
 
+=======
+>>>>>>> Stashed changes
 function clearGallery() {
   refs.gallery.innerHTML = "";
 }
 
+<<<<<<< Updated upstream
 window.addEventListener('scroll', debounce(() => {
   const documentRect = document.documentElement.getBoundingClientRect()
   console.log(documentRect.bottom, documentRect.height)
   const mid = document.documentElement.clientHeight
   console.log(mid)
+=======
+
+const debouncedAddMoreFoto = debounce(addMoreFoto, 500);
+
+async function addMoreFoto() {
+  const documentRect = document.documentElement.getBoundingClientRect();
+  const mid = document.documentElement.clientHeight;
+
+>>>>>>> Stashed changes
   if (documentRect.bottom < mid + 500) {
-  fotoService.fetchFoto().then(hits => murkupGallery(hits));
+    try {
+     const { hits } = await fotoService.fetchFoto();
+    const murkup = murkupGallery(hits);
+    refs.gallery.insertAdjacentHTML('beforeend', murkup);
+    lightbox.refresh();
+    } catch (error) {
+       Notify.failure('We are sorry, but you have reached the end of search results.');
+    }
   }
-}, 200))
+}
+
+window.addEventListener('scroll', debouncedAddMoreFoto);
