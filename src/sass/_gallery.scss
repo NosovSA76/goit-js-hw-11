@@ -6,6 +6,7 @@
   gap: 40px;
   width: 1200px;
   margin: auto;
+  left: 60px;
   z-index: 1;
 }
 
@@ -51,6 +52,10 @@ img:hover{
 .serch-imput {
   border-radius: 4px;
   padding: 10px;
+}
+
+.crutch {
+  display: none;
 }
 
 .search-btn {
