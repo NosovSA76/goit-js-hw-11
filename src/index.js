@@ -6,9 +6,11 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 import FotoService from './js/fetchFoto';
 import { refs } from './js/refs.js'
 import { murkupGallery } from './js/markupGallery';
+// import { addMoreFoto } from './js/addMoreFoto';
 
 var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
 const fotoService = new FotoService();
+let maxRequests = 13;
 
 refs.searchForm.addEventListener('submit', onSearch);
 
@@ -28,30 +30,41 @@ function clearGallery() {
 const addMoreFoto = async () => {
   try {
     const { hits, total } = await fotoService.fetchFoto();
-    const markup = murkupGallery(hits);
-    refs.gallery.insertAdjacentHTML('beforeend', markup);
-    console.log(fotoService.page);
-    lightbox.refresh();
 
-    const maxRequests = Math.ceil(total / fotoService.perPage);
-    if (fotoService.page >= maxRequests) {
-      console.loge(maxRequests)
-      Notify.failure("We're sorry, but you've reached the end of search results.");
-      observer.disconnect();
+    if (total && fotoService.page === 2) {
+      Notify.success(`Hooray! We found ${total} images.`);
+    }
+    else if (total === 0) {
+      Notify.failure("Sorry, there are no images matching your search query. Please try again.");
       return;
     }
+
+    const markup = murkupGallery(hits);
+    refs.gallery.insertAdjacentHTML('beforeend', markup);
+    lightbox.refresh();
+
+    if (total <= 520 ){
+      maxRequests = Math.ceil(total / 40);
+    }
+
     observer.observe(refs.gallery.lastElementChild);
-  } catch (error) {
+  }
+
+  catch (error) {
     Notify.failure('Something went wrong!');
     observer.disconnect();
   }
 };
 
-// Створення спостерігача
 const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+      if (fotoService.page === maxRequests + 1) {
+      Notify.failure("We're sorry, but you've reached the end of search results.");
+      observer.disconnect();
+      return;
+      }
         addMoreFoto();
         observer.unobserve(entry.target);
       }
@@ -59,6 +72,3 @@ const observer = new IntersectionObserver(
   },
   { threshold: 0.5 }
 );
-
-// Початкове спостереження
-observer.observe(refs.gallery.lastElementChild);
