@@ -11,6 +11,7 @@ import { murkupGallery } from './js/markupGallery';
 var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
 const fotoService = new FotoService();
 let maxRequests = 13;
+let minSerch
 
 refs.searchForm.addEventListener('submit', onSearch);
 
@@ -30,7 +31,7 @@ function clearGallery() {
 const addMoreFoto = async () => {
   try {
     const { hits, total } = await fotoService.fetchFoto();
-
+    minSerch = total
     if (total && fotoService.page === 2) {
       Notify.success(`Hooray! We found ${total} images.`);
     }
@@ -59,6 +60,10 @@ const addMoreFoto = async () => {
 const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
+      if (minSerch < 9) {
+        observer.disconnect();
+      return;
+      }
       if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
       if (fotoService.page === maxRequests + 1) {
       Notify.failure("We're sorry, but you've reached the end of search results.");
