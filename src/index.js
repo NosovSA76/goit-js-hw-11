@@ -6,7 +6,7 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 import FotoService from './js/fetchFoto';
 import { refs } from './js/refs.js'
 import { murkupGallery } from './js/markupGallery';
-// import { addMoreFoto } from './js/addMoreFoto';
+import { notifyInit } from './js/notifyInit';
 
 var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
 const fotoService = new FotoService();
@@ -20,8 +20,10 @@ async function onSearch(e) {
   clearGallery();
   fotoService.resetPage();
   fotoService.query = e.currentTarget.elements.searchQuery.value.trim().toLowerCase();
-  console.log(fotoService.query);
-  addMoreFoto();
+  if (fotoService.query) {
+    console.log(fotoService.query);
+    addMoreFoto();
+  }
 }
 
 function clearGallery() {
@@ -36,23 +38,20 @@ const addMoreFoto = async () => {
       Notify.success(`Hooray! We found ${total} images.`);
     }
     else if (total === 0) {
-      Notify.failure("Sorry, there are no images matching your search query. Please try again.");
+      Notify.failure("Sorry, there are no images matching your search query. Please try again.", notifyInit);
       return;
     }
-
     const markup = murkupGallery(hits);
     refs.gallery.insertAdjacentHTML('beforeend', markup);
     lightbox.refresh();
-
     if (total <= 520 ){
       maxRequests = Math.ceil(total / 40);
     }
-
     observer.observe(refs.gallery.lastElementChild);
   }
 
   catch (error) {
-    Notify.failure('Something went wrong!');
+    Notify.failure('Something went wrong!', notifyInit);
     observer.disconnect();
   }
 };
@@ -60,13 +59,15 @@ const addMoreFoto = async () => {
 const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
-      if (minSerch < 9) {
+      if (minSerch <= 40) {
         observer.disconnect();
       return;
       }
       if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-      if (fotoService.page === maxRequests + 1) {
-      Notify.failure("We're sorry, but you've reached the end of search results.");
+      if (fotoService.page === maxRequests) {
+      Notify.failure("We're sorry, but you've reached the end of search results.", notifyInit);
+      }
+       if (fotoService.page === maxRequests + 1) {
       observer.disconnect();
       return;
       }

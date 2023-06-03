@@ -3,7 +3,7 @@ export const notifyInit = {
   position: 'right-bottom',
   distance: '20px',
   timeout: 1500,
-  opacity: 0.8,
+  opacity: 0.5,
   fontSize: '16px',
   borderRadius: '50px',
 };
