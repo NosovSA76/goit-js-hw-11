@@ -21,7 +21,7 @@ async function onSearch(e) {
   fotoService.resetPage();
   fotoService.query = e.currentTarget.elements.searchQuery.value.trim().toLowerCase();
   if (fotoService.query) {
-    console.log(fotoService.query);
+    minSerch = 41
     addMoreFoto();
   }
 }
@@ -34,8 +34,9 @@ const addMoreFoto = async () => {
   try {
     const { hits, total } = await fotoService.fetchFoto();
     minSerch = total
+    console.log(minSerch)
     if (total && fotoService.page === 2) {
-      Notify.success(`Hooray! We found ${total} images.`);
+      Notify.success(`Hooray! We found ${total} images.`, notifyInit);
     }
     else if (total === 0) {
       Notify.failure("Sorry, there are no images matching your search query. Please try again.", notifyInit);
@@ -43,8 +44,16 @@ const addMoreFoto = async () => {
     }
     const markup = murkupGallery(hits);
     refs.gallery.insertAdjacentHTML('beforeend', markup);
+    const { height: cardHeight } = document
+    .querySelector(".gallery")
+   .firstElementChild.getBoundingClientRect();
+    window.scrollBy({
+    top: cardHeight * 2,
+    behavior: "smooth",
+});
     lightbox.refresh();
-    if (total <= 520 ){
+    if (total <= 520) {
+      console.log(minSerch)
       maxRequests = Math.ceil(total / 40);
     }
     observer.observe(refs.gallery.lastElementChild);
@@ -58,17 +67,19 @@ const addMoreFoto = async () => {
 
 const observer = new IntersectionObserver(
   (entries) => {
-    entries.forEach((entry) => {
-      if (minSerch <= 40) {
-        observer.disconnect();
-      return;
+    console.log(minSerch)
+    if (minSerch <= 40) {
+        console.log(minSerch)
+        return;
       }
+    entries.forEach((entry) => {
+
       if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-      if (fotoService.page === maxRequests) {
+        if (fotoService.page === maxRequests) {
+        console.log(minSerch)
       Notify.failure("We're sorry, but you've reached the end of search results.", notifyInit);
       }
-       if (fotoService.page === maxRequests + 1) {
-      observer.disconnect();
+        if (fotoService.page === maxRequests + 1) {
       return;
       }
         addMoreFoto();
