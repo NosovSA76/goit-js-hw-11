@@ -13,6 +13,7 @@ const fotoService = new FotoService();
 let maxRequests = 13;
 let minSerch
 
+
 refs.searchForm.addEventListener('submit', onSearch);
 
 async function onSearch(e) {
