@@ -34,7 +34,6 @@ const addMoreFoto = async () => {
   try {
     const { hits, total } = await fotoService.fetchFoto();
     minSerch = total
-    console.log(minSerch)
     if (total && fotoService.page === 2) {
       Notify.success(`Hooray! We found ${total} images.`, notifyInit);
     }
@@ -42,7 +41,9 @@ const addMoreFoto = async () => {
       Notify.failure("Sorry, there are no images matching your search query. Please try again.", notifyInit);
       return;
     }
+
     const markup = murkupGallery(hits);
+
     refs.gallery.insertAdjacentHTML('beforeend', markup);
     const { height: cardHeight } = document
     .querySelector(".gallery")
@@ -50,12 +51,16 @@ const addMoreFoto = async () => {
     window.scrollBy({
     top: cardHeight * 2,
     behavior: "smooth",
-});
+    });
+
     lightbox.refresh();
+    maxRequests = 13;
+
     if (total <= 520) {
       console.log(minSerch)
       maxRequests = Math.ceil(total / 40);
     }
+
     observer.observe(refs.gallery.lastElementChild);
   }
 
@@ -67,21 +72,19 @@ const addMoreFoto = async () => {
 
 const observer = new IntersectionObserver(
   (entries) => {
-    console.log(minSerch)
-    if (minSerch <= 40) {
-        console.log(minSerch)
-        return;
-      }
     entries.forEach((entry) => {
 
       if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
         if (fotoService.page === maxRequests) {
-        console.log(minSerch)
       Notify.failure("We're sorry, but you've reached the end of search results.", notifyInit);
       }
         if (fotoService.page === maxRequests + 1) {
       return;
       }
+
+        if (minSerch <= 40) {
+        return;
+        }
         addMoreFoto();
         observer.unobserve(entry.target);
       }
