@@ -86,6 +86,7 @@ const observer = new IntersectionObserver(
         if (minSerch <= 40) {
         return;
         }
+
         addMoreFoto();
         observer.unobserve(entry.target);
       }
