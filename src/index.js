@@ -8,6 +8,7 @@ import { refs } from './js/refs.js'
 import { murkupGallery } from './js/markupGallery';
 import { notifyInit } from './js/notifyInit';
 
+
 var lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
 const fotoService = new FotoService();
 let maxRequests = 13;
