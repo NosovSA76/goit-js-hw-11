@@ -1,9 +1,9 @@
 export const notifyInit = {
   width: '250px',
   position: 'right-bottom',
-  distance: '20px',
-  timeout: 500,
-  opacity: 0.7,
+  distance: '50%',
+  timeout: 1500,
+  opacity: 0.9,
   fontSize: '16px',
   borderRadius: '50px',
 };
